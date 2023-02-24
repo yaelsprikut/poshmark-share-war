@@ -169,6 +169,13 @@ def get_closet_urls():
     urls = [i.find_element_by_css_selector('a').get_attribute('href') for i in items]
     return urls
 
+def get_like_icons():
+    print("Get like icons")
+    item_pat = "//div[@class='social-action-bar tile__social-actions']"
+    # item_pat = "//div[@class='d--fl ai--c cursor--pointer social-action-bar__action social-action-bar__like']"
+    items = driver.find_elements_by_xpath(item_pat)
+    like_icons = [i.find_element_by_css_selector(".social-action-bar__like") for i in items]
+    return like_icons
 
 def get_closet_share_icons():
     item_pat = "//div[@class='social-info social-actions d-fl ai-c jc-c']"
@@ -180,9 +187,12 @@ def get_closet_share_icons():
         share_icons = [i.find_element_by_css_selector(".share-gray-large") for i in items]
     return share_icons
 
+def click_like_item(like_icon, d=3):
+    print("Like item")
+    ## First share click
+    driver.execute_script("arguments[0].click();", like_icon); time.sleep(rt(d))
 
 def clicks_share_followers(share_icon, d=5.5):
-
     ## First share click
     driver.execute_script("arguments[0].click();", share_icon); time.sleep(rt(d))
 
@@ -231,6 +241,8 @@ def deploy_share_war(n=3, order=True, random_subset=0):
                     pass
             scroll_page(n)
 
+            ## Like Icons
+            like_icons = get_like_icons()
             ## Share Icons and Order
             share_icons = get_closet_share_icons()
 
@@ -250,7 +262,9 @@ def deploy_share_war(n=3, order=True, random_subset=0):
                             please wait...
                         '''.format(random_subset, len(share_icons))))
 
+                    like_icons = np.random.choice(like_icons, random_subset, replace=False).tolist()
                     share_icons = np.random.choice(share_icons, random_subset, replace=False).tolist()
+                    print("like_icons: ", like_icons)
                     print("share_icons: ", share_icons)
                     time.sleep(rt(10))
                 except:
@@ -265,6 +279,7 @@ def deploy_share_war(n=3, order=True, random_subset=0):
                 '''.format(len(share_icons))))
             
             ## Share Listings
+            [click_like_item(item) for item in like_icons]
             [clicks_share_followers(item) for item in share_icons]
             print("[*] closet successfully shared...posh-on...")
             pass 
